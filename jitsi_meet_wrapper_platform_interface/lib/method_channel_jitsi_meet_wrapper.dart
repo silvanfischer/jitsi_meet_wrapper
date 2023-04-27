@@ -147,8 +147,7 @@ class MethodChannelJitsiMeetWrapper extends JitsiMeetWrapperPlatformInterface {
   }
 
   Map<String, Object>? _toFeatureFlagStrings(
-    Map<FeatureFlag, Object?>? featureFlags,
-  ) {
+      Map<FeatureFlag, Object?>? featureFlags,) {
     if (featureFlags == null) return null;
     Map<String, Object> featureFlagsWithStrings = {};
     featureFlags.forEach((key, value) {
@@ -236,6 +235,8 @@ class MethodChannelJitsiMeetWrapper extends JitsiMeetWrapperPlatformInterface {
         return 'video-mute.enabled';
       case FeatureFlag.isVideoShareButtonEnabled:
         return 'video-share.enabled';
+      case FeatureFlag.isPrejoinPageEnabled:
+        return 'prejoinpage.enabled';
     }
   }
 }
