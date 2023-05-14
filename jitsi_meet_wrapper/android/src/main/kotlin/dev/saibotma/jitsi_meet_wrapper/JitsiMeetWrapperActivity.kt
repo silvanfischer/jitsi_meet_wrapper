@@ -11,7 +11,11 @@ import org.jitsi.meet.sdk.BroadcastEvent
 import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import java.util.HashMap
-
+import android.view.WindowManager
+import androidx.core.content.ContextCompat.getSystemService
+import android.app.KeyguardManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 
 class JitsiMeetWrapperActivity : JitsiMeetActivity() {
     private val eventStreamHandler = JitsiMeetWrapperEventStreamHandler.instance
@@ -37,6 +41,20 @@ class JitsiMeetWrapperActivity : JitsiMeetActivity() {
         super.onCreate(savedInstanceState)
         registerForBroadcastMessages()
         eventStreamHandler.onOpened()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+            val keyguardManager: KeyguardManager =
+                getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+            keyguardManager.requestDismissKeyguard(this, null)
+        } else {
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            )
+        }
     }
 
     private fun registerForBroadcastMessages() {
@@ -44,7 +62,8 @@ class JitsiMeetWrapperActivity : JitsiMeetActivity() {
         for (eventType in BroadcastEvent.Type.values()) {
             intentFilter.addAction(eventType.action)
         }
-        LocalBroadcastManager.getInstance(this).registerReceiver(this.broadcastReceiver, intentFilter)
+        LocalBroadcastManager.getInstance(this)
+            .registerReceiver(this.broadcastReceiver, intentFilter)
     }
 
     private fun onBroadcastReceived(intent: Intent?) {
@@ -53,17 +72,44 @@ class JitsiMeetWrapperActivity : JitsiMeetActivity() {
             val data = event.data
             when (event.type!!) {
                 BroadcastEvent.Type.CONFERENCE_JOINED -> eventStreamHandler.onConferenceJoined(data)
-                BroadcastEvent.Type.CONFERENCE_TERMINATED -> eventStreamHandler.onConferenceTerminated(data)
-                BroadcastEvent.Type.CONFERENCE_WILL_JOIN -> eventStreamHandler.onConferenceWillJoin(data)
-                BroadcastEvent.Type.AUDIO_MUTED_CHANGED -> eventStreamHandler.onAudioMutedChanged(data)
-                BroadcastEvent.Type.PARTICIPANT_JOINED -> eventStreamHandler.onParticipantJoined(data)
+                BroadcastEvent.Type.CONFERENCE_TERMINATED -> eventStreamHandler.onConferenceTerminated(
+                    data
+                )
+
+                BroadcastEvent.Type.CONFERENCE_WILL_JOIN -> eventStreamHandler.onConferenceWillJoin(
+                    data
+                )
+
+                BroadcastEvent.Type.AUDIO_MUTED_CHANGED -> eventStreamHandler.onAudioMutedChanged(
+                    data
+                )
+
+                BroadcastEvent.Type.PARTICIPANT_JOINED -> eventStreamHandler.onParticipantJoined(
+                    data
+                )
+
                 BroadcastEvent.Type.PARTICIPANT_LEFT -> eventStreamHandler.onParticipantLeft(data)
-                BroadcastEvent.Type.ENDPOINT_TEXT_MESSAGE_RECEIVED -> eventStreamHandler.onEndpointTextMessageReceived(data)
-                BroadcastEvent.Type.SCREEN_SHARE_TOGGLED -> eventStreamHandler.onScreenShareToggled(data)
-                BroadcastEvent.Type.PARTICIPANTS_INFO_RETRIEVED -> eventStreamHandler.onParticipantsInfoRetrieved(data)
-                BroadcastEvent.Type.CHAT_MESSAGE_RECEIVED -> eventStreamHandler.onChatMessageReceived(data)
+                BroadcastEvent.Type.ENDPOINT_TEXT_MESSAGE_RECEIVED -> eventStreamHandler.onEndpointTextMessageReceived(
+                    data
+                )
+
+                BroadcastEvent.Type.SCREEN_SHARE_TOGGLED -> eventStreamHandler.onScreenShareToggled(
+                    data
+                )
+
+                BroadcastEvent.Type.PARTICIPANTS_INFO_RETRIEVED -> eventStreamHandler.onParticipantsInfoRetrieved(
+                    data
+                )
+
+                BroadcastEvent.Type.CHAT_MESSAGE_RECEIVED -> eventStreamHandler.onChatMessageReceived(
+                    data
+                )
+
                 BroadcastEvent.Type.CHAT_TOGGLED -> eventStreamHandler.onChatToggled(data)
-                BroadcastEvent.Type.VIDEO_MUTED_CHANGED -> eventStreamHandler.onVideoMutedChanged(data)
+                BroadcastEvent.Type.VIDEO_MUTED_CHANGED -> eventStreamHandler.onVideoMutedChanged(
+                    data
+                )
+
                 BroadcastEvent.Type.READY_TO_CLOSE -> {}
             }
         }
