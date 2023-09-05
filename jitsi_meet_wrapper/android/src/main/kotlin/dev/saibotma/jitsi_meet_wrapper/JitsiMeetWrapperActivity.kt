@@ -116,8 +116,8 @@ class JitsiMeetWrapperActivity : JitsiMeetActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         LocalBroadcastManager.getInstance(this).unregisterReceiver(this.broadcastReceiver)
         eventStreamHandler.onClosed()
+        super.onDestroy()
     }
 }
